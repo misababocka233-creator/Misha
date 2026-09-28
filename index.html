@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Mr. Dudec Clicker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="score-board">
+            <span id="score">0</span>
+            <span class="label">очки</span>
+        </div>
+
+        <div class="dudec-wrapper" id="tap-area">
+            <div class="dudec-box">
+                <img src="dudec.png" id="dudec-img" alt="Mr Dudec">
+                <div id="notes-container"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="btn-shop" class="btn">СКІНИ</button>
+            <button id="btn-restart" class="btn">🔄</button>
+            <button id="btn-settings" class="btn">⚙️</button>
+        </div>
+    </div>
+
+    <!-- Модалка Вибору Скінів та Треків -->
+    <div id="modal-shop" class="modal hidden">
+        <div class="modal-content">
+            <h2>СКІНИ</h2>
+            
+            <p style="margin-top: 15px; font-weight: bold; color: #aaa;">сорі що так мало:</p>
+            <select id="select-skin" class="custom-select">
+                <option value="dudec.png">скін 1</option>
+                <option value="dudec_gold.png">скін 2</option>
+                <option value="ret.png">скін 3</option>
+            </select>
+
+            <p style="margin-top: 15px; font-weight: bold; color: #aaa;">ОБЕРИ МУЗИКУ:</p>
+            <select id="select-track" class="custom-select">
+                <option value="1doot.mp3">Classic Doot </option>
+                <option value="dudec.mp3">Doot sherks </option>
+                <option
+value="das.mp3">Door maink</option>
+              </select>
+
+            <button id="btn-close-shop" class="btn btn-primary">ЗБЕРЕГТИ</button>
+        </div>
+    </div>
+
+    <!-- Меню Game Over -->
+    <div id="modal-gameover" class="modal hidden">
+        <div class="modal-content">
+            <h2 style="color: #ff4444;">GAME OVER</h2>
+            <p class="final-score-text">Твій результат: <b id="final-score">0</b> DOOTS</p>
+            <button id="btn-modal-restart" class="btn btn-primary">ЗНОВУ </button>
+        </div>
+    </div>
+
+    <!-- Налаштування -->
+    <div id="modal-settings" class="modal hidden">
+        <div class="modal-content">
+            <h2>НАЛАШТУВАННЯ</h2>
+            <div class="setting-item">
+                <label for="volume">Гучність:</label>
+                <input type="range" id="volume" min="0" max="1" step="0.1" value="0.8">
+            </div>
+            <button id="btn-close-settings" class="btn btn-primary">ЗБЕРЕГТИ</button>
+        </div>
+    </div>
+
+    <audio id="bg-music" src="1doot.mp3" loop></audio>
+
+    <script src="script.js"></script>
+</body>
+</html>
