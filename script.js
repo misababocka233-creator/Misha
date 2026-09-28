@@ -1,159 +1,236 @@
-let score = 0;
-let isPlaying = true;
-let tapTimeout = null;
-const stopDelay = 800; // Пауза до Game Over
-let flipLeft = false;
+// Стан гри
+let score = parseInt(localStorage.getItem('dudec_score')) || 1;
+let currentSkin = localStorage.getItem('dudec_skin') || 'classic';
+let currentSkel = localStorage.getItem('dudec_skel') || 'classic';
+let currentMusic = localStorage.getItem('dudec_music') || 'dudec';
+let globalVolume = parseFloat(localStorage.getItem('dudec_vol')) || 0.5;
+
+let isGameActive = false; // Чекаємо на перший тап
+let spawnerTimeout = null;
+let inactivityTimeout = null;
+let noteTimeout = null;
+let lastTiltLeft = false;
 
 // Елементи
 const scoreDisplay = document.getElementById('score');
 const dudecImg = document.getElementById('dudec-img');
-const tapArea = document.getElementById('tap-area');
-const notesContainer = document.getElementById('notes-container');
-const bgMusic = document.getElementById('bg-music');
+const dudecBox = document.getElementById('dudec-box');
 
-const btnRestart = document.getElementById('btn-restart');
-const btnSettings = document.getElementById('btn-settings');
-const btnShop = document.getElementById('btn-shop');
-
+const modalSkins = document.getElementById('modal-skins');
 const modalSettings = document.getElementById('modal-settings');
-const btnCloseSettings = document.getElementById('btn-close-settings');
-const volumeSlider = document.getElementById('volume');
-
-const modalShop = document.getElementById('modal-shop');
-const btnCloseShop = document.getElementById('btn-close-shop');
-const selectSkin = document.getElementById('select-skin');
-const selectTrack = document.getElementById('select-track');
-
 const modalGameOver = document.getElementById('modal-gameover');
 const finalScoreDisplay = document.getElementById('final-score');
-const btnModalRestart = document.getElementById('btn-modal-restart');
 
-const notesList = ['🎵', '🎶'];
+// Ресурси
+const skins = { 'classic': 'dudec.png', 'gold': 'dudec_gold.png', 'phonk': 'ret.png' };
+const skels = { 'classic': 'sa.png', 'gold': 'fer.png', 'phonk': 'ger.png' };
+const musicFiles = { 'dudec': 'dudec.mp3', 'das': 'das.mp3', '1doot': '1doot.mp3' };
 
-// Виліт ноти з труби
-function spawnNote() {
-    const note = document.createElement('div');
-    note.className = 'music-note';
-    note.textContent = notesList[Math.floor(Math.random() * notesList.length)];
+let musicAudio = new Audio(musicFiles[currentMusic] || 'dudec.mp3');
+musicAudio.loop = true;
 
-    const startX = flipLeft ? 40 : 160;
-    const startY = 120;
+// Ініціалізація
+scoreDisplay.textContent = score;
+dudecImg.src = skins[currentSkin] || skins['classic'];
 
-    note.style.left = `${startX}px`;
-    note.style.top = `${startY}px`;
+// Блокуємо спливання тапу з усіх модальних вікон, селектів та інтерфейсу
+document.querySelectorAll('.modal, select, input, .top-bar').forEach(element => {
+    element.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
+    });
+});
 
-    const dx = (Math.random() * 80 - 40) + (flipLeft ? -50 : 50);
-    const dy = -(Math.random() * 80 + 50);
-    const dr = (Math.random() * 60 - 30) + 'deg';
+// Тап по Дудецю
+dudecBox.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
 
-    note.style.setProperty('--dx', `${dx}px`);
-    note.style.setProperty('--dy', `${dy}px`);
-    note.style.setProperty('--dr', dr);
+    // Запускаємо гру при першому тапі
+    if (!isGameActive) {
+        isGameActive = true;
+        startSkeletonSpawner();
+    }
 
-    notesContainer.appendChild(note);
-
-    setTimeout(() => {
-        note.remove();
-    }, 600);
-}
-
-// Клік / Тап
-function handleTap(e) {
-    if (e) e.preventDefault();
-    if (!isPlaying) return;
+    // Оновлюємо таймер бездіяльності (6 секунд без тапів = програш)
+    resetInactivityTimer();
 
     score++;
     scoreDisplay.textContent = score;
+    localStorage.setItem('dudec_score', score);
 
-    if (bgMusic.paused) {
-        bgMusic.play().catch(err => console.log(err));
-    }
-
-    clearTimeout(tapTimeout);
-    tapTimeout = setTimeout(() => {
-        if (isPlaying && score > 0) {
-            triggerGameOver();
-        }
-    }, stopDelay);
-
-    // Поворот вліво / вправо
-    if (flipLeft) {
-        dudecImg.className = 'flip-left';
+    // Анімація качання
+    dudecImg.classList.remove('tilt-left', 'tilt-right');
+    if (lastTiltLeft) {
+        dudecImg.classList.add('tilt-right');
     } else {
-        dudecImg.className = 'flip-right';
+        dudecImg.classList.add('tilt-left');
     }
-    
-    spawnNote();
-    flipLeft = !flipLeft;
+    lastTiltLeft = !lastTiltLeft;
 
     setTimeout(() => {
-        dudecImg.className = '';
-    }, 60);
+        dudecImg.classList.remove('tilt-left', 'tilt-right');
+    }, 100);
+
+    triggerDootSoundAndNotes();
+});
+
+// Таймер бездіяльності
+function resetInactivityTimer() {
+    clearTimeout(inactivityTimeout);
+    if (!isGameActive) return;
+
+    inactivityTimeout = setTimeout(() => {
+        if (isGameActive) {
+            triggerGameOver();
+        }
+    }, 1000);
 }
 
-// Екран зупинки
+// Керування звуком та нотами при тапі
+function triggerDootSoundAndNotes() {
+    musicAudio.volume = globalVolume;
+
+    if (musicAudio.paused) {
+        musicAudio.play().catch(() => {});
+    }
+
+    dudecBox.classList.add('dancing');
+
+    clearTimeout(noteTimeout);
+    noteTimeout = setTimeout(() => {
+        dudecBox.classList.remove('dancing');
+        musicAudio.pause();
+    }, 400);
+}
+
+// Модалки
+document.getElementById('btn-skins').addEventListener('click', () => {
+    document.getElementById('select-skin').value = currentSkin;
+    document.getElementById('select-skel').value = currentSkel;
+    document.getElementById('select-music').value = currentMusic;
+    modalSkins.classList.remove('hidden');
+});
+
+document.getElementById('btn-settings').addEventListener('click', () => {
+    document.getElementById('volume-range').value = globalVolume;
+    modalSettings.classList.remove('hidden');
+});
+
+// Скидання очок
+document.getElementById('btn-reset').addEventListener('click', () => {
+    if (confirm("Скинути очки в 0?")) {
+        score = 0;
+        scoreDisplay.textContent = score;
+        localStorage.setItem('dudec_score', 0);
+    }
+});
+
+// Збереження Скінів
+document.getElementById('save-skins').addEventListener('click', () => {
+    currentSkin = document.getElementById('select-skin').value;
+    currentSkel = document.getElementById('select-skel').value;
+    currentMusic = document.getElementById('select-music').value;
+
+    localStorage.setItem('dudec_skin', currentSkin);
+    localStorage.setItem('dudec_skel', currentSkel);
+    localStorage.setItem('dudec_music', currentMusic);
+
+    dudecImg.src = skins[currentSkin];
+
+    musicAudio.pause();
+    musicAudio = new Audio(musicFiles[currentMusic] || 'dudec.mp3');
+    musicAudio.loop = true;
+
+    modalSkins.classList.add('hidden');
+});
+
+// Збереження Налаштувань
+document.getElementById('save-settings').addEventListener('click', () => {
+    globalVolume = parseFloat(document.getElementById('volume-range').value);
+    localStorage.setItem('dudec_vol', globalVolume);
+    modalSettings.classList.add('hidden');
+});
+
+// Кнопка ЗНОВУ
+document.getElementById('restart-btn').addEventListener('click', () => {
+    modalGameOver.classList.add('hidden');
+    isGameActive = false;
+});
+
+// Game Over (тільки від таймауту бездіяльності)
 function triggerGameOver() {
-    isPlaying = false;
-    bgMusic.pause();
-    bgMusic.currentTime = 0;
+    isGameActive = false;
+    clearTimeout(spawnerTimeout);
+    clearTimeout(inactivityTimeout);
+    spawnerTimeout = false;
+
+    document.querySelectorAll('.moving-skeleton').forEach(skel => skel.remove());
+
+    musicAudio.pause();
+    dudecBox.classList.remove('dancing');
 
     finalScoreDisplay.textContent = score;
     modalGameOver.classList.remove('hidden');
 }
 
-// Скидання
-function resetGame() {
-    clearTimeout(tapTimeout);
-    score = 0;
-    scoreDisplay.textContent = score;
-    isPlaying = true;
-    bgMusic.pause();
-    bgMusic.currentTime = 0;
-    dudecImg.className = '';
-    notesContainer.innerHTML = '';
-    modalGameOver.classList.add('hidden');
+// Спавнер скелетів (бонусні цілі)
+function spawnSkeleton() {
+    if (!isGameActive) return;
+
+    const skeleton = document.createElement('img');
+    skeleton.src = skels[currentSkel] || 'dudec.png';
+    skeleton.classList.add('moving-skeleton');
+
+    const padding = 80;
+    const maxX = window.innerWidth - padding;
+    const maxY = window.innerHeight - padding;
+
+    const startX = Math.floor(Math.random() * (maxX - padding)) + padding / 2;
+    const startY = Math.floor(Math.random() * (maxY - padding)) + padding / 2;
+
+    const endX = Math.floor(Math.random() * (maxX - padding)) + padding / 2;
+    const endY = Math.floor(Math.random() * (maxY - padding)) + padding / 2;
+
+    skeleton.style.left = `${startX}px`;
+    skeleton.style.top = `${startY}px`;
+
+    // Тап по бонусному скелету
+    skeleton.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        if (!isGameActive) return;
+
+        score += 10;
+        scoreDisplay.textContent = score;
+        localStorage.setItem('dudec_score', score);
+
+        resetInactivityTimer();
+        triggerDootSoundAndNotes();
+        skeleton.remove();
+    });
+
+    document.body.appendChild(skeleton);
+
+    setTimeout(() => {
+        skeleton.style.left = `${endX}px`;
+        skeleton.style.top = `${endY}px`;
+    }, 50);
+
+    // Скелет просто пролітає та зникає (БЕЗ викликання Game Over)
+    setTimeout(() => {
+        if (document.body.contains(skeleton)) {
+            skeleton.remove();
+        }
+    }, 4000);
 }
 
-// Події
-tapArea.addEventListener('touchstart', handleTap, { passive: false });
-tapArea.addEventListener('mousedown', handleTap);
-
-btnRestart.addEventListener('click', (e) => {
-    e.stopPropagation();
-    resetGame();
-});
-
-btnModalRestart.addEventListener('click', resetGame);
-
-// Магазин / Вибір скінів
-btnShop.addEventListener('click', (e) => {
-    e.stopPropagation();
-    modalShop.classList.remove('hidden');
-});
-
-btnCloseShop.addEventListener('click', () => {
-    modalShop.classList.add('hidden');
-});
-
-selectSkin.addEventListener('change', (e) => {
-    dudecImg.src = e.target.value;
-});
-
-selectTrack.addEventListener('change', (e) => {
-    bgMusic.src = e.target.value;
-    bgMusic.currentTime = 0;
-});
-
-// Налаштування
-btnSettings.addEventListener('click', (e) => {
-    e.stopPropagation();
-    modalSettings.classList.remove('hidden');
-});
-
-btnCloseSettings.addEventListener('click', () => {
-    modalSettings.classList.add('hidden');
-});
-
-volumeSlider.addEventListener('input', (e) => {
-    bgMusic.volume = e.target.value;
-});
+function startSkeletonSpawner() {
+    if (!isGameActive) return;
+    const randomDelay = Math.floor(Math.random() * 2500) + 2000;
+    spawnerTimeout = setTimeout(() => {
+        if (isGameActive) {
+            spawnSkeleton();
+            startSkeletonSpawner();
+        }
+    }, randomDelay);
+}

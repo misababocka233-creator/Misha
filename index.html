@@ -2,77 +2,85 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mr. Dudec Clicker</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="game-container">
-        <div class="score-board">
-            <span id="score">0</span>
-            <span class="label">очки</span>
+        <!-- Рахунок -->
+        <div class="score-box">
+            <h1 id="score">0</h1>
+            <p class="score-label">очки</p>
         </div>
 
-        <div class="dudec-wrapper" id="tap-area">
-            <div class="dudec-box">
-                <img src="dudec.png" id="dudec-img" alt="Mr Dudec">
-                <div id="notes-container"></div>
+        <!-- Дудець -->
+        <div class="dudec-wrapper" id="dudec-box">
+            <span class="note note-left">🎵</span>
+            <img id="dudec-img" src="dudec.png" alt="Mr. Dudec">
+            <span class="note note-right">🎶</span>
+        </div>
+
+        <!-- Нижнє меню (як на скрінах) -->
+        <div class="bottom-menu">
+            <button class="menu-btn" id="btn-skins">СКІНИ</button>
+            <button class="menu-btn icon-btn" id="btn-reset">🔄</button>
+            <button class="menu-btn icon-btn" id="btn-settings">⚙️</button>
+        </div>
+
+        <!-- Модалка СКІНИ (як на скрінах) -->
+        <div class="modal-overlay hidden" id="modal-skins">
+            <div class="modal-card">
+                <h2>СКІНИ</h2>
+                
+                <label>сорі що так мало:</label>
+                <select id="select-skin" class="custom-select">
+                    <option value="classic">скін 1 </option>
+                    <option value="gold">скін 2</option>
+                    <option value="phonk">скін 3</option>
+                </select>
+
+                <label>ОБЕРИ ВИД СКЕЛЕТІВ:</label>
+                <select id="select-skel" class="custom-select">
+                    <option value="classic">Скелет 1</option>
+                    <option value="gold">Скелет 2</option>
+                    <option value="phonk">Скелет 3</option>
+                </select>
+
+                <label>ОБЕРИ МУЗИКУ:</label>
+                <select id="select-music" class="custom-select">
+                    <option value="dudec">Classic Doot</option>
+                    <option value="das">Spooky</option>
+                    <option value="1doot">Shrek Sax</option>
+                </select>
+
+                <button class="btn-red" id="save-skins">ЗБЕРЕГТИ</button>
             </div>
         </div>
 
-        <div class="controls">
-            <button id="btn-shop" class="btn">СКІНИ</button>
-            <button id="btn-restart" class="btn">🔄</button>
-            <button id="btn-settings" class="btn">⚙️</button>
-        </div>
-    </div>
+        <!-- Модалка НАЛАШТУВАННЯ (як на скрінах) -->
+        <div class="modal-overlay hidden" id="modal-settings">
+            <div class="modal-card">
+                <h2>НАЛАШТУВАННЯ</h2>
+                
+                <div class="volume-row">
+                    <span>Гучність:</span>
+                    <input type="range" id="volume-range" min="0" max="1" step="0.1" value="0.5">
+                </div>
 
-    <!-- Модалка Вибору Скінів та Треків -->
-    <div id="modal-shop" class="modal hidden">
-        <div class="modal-content">
-            <h2>СКІНИ</h2>
-            
-            <p style="margin-top: 15px; font-weight: bold; color: #aaa;">сорі що так мало:</p>
-            <select id="select-skin" class="custom-select">
-                <option value="dudec.png">скін 1</option>
-                <option value="dudec_gold.png">скін 2</option>
-                <option value="ret.png">скін 3</option>
-            </select>
-
-            <p style="margin-top: 15px; font-weight: bold; color: #aaa;">ОБЕРИ МУЗИКУ:</p>
-            <select id="select-track" class="custom-select">
-                <option value="1doot.mp3">Classic Doot </option>
-                <option value="dudec.mp3">Doot sherks </option>
-                <option
-value="das.mp3">Door maink</option>
-              </select>
-
-            <button id="btn-close-shop" class="btn btn-primary">ЗБЕРЕГТИ</button>
-        </div>
-    </div>
-
-    <!-- Меню Game Over -->
-    <div id="modal-gameover" class="modal hidden">
-        <div class="modal-content">
-            <h2 style="color: #ff4444;">GAME OVER</h2>
-            <p class="final-score-text">Твій результат: <b id="final-score">0</b> DOOTS</p>
-            <button id="btn-modal-restart" class="btn btn-primary">ЗНОВУ </button>
-        </div>
-    </div>
-
-    <!-- Налаштування -->
-    <div id="modal-settings" class="modal hidden">
-        <div class="modal-content">
-            <h2>НАЛАШТУВАННЯ</h2>
-            <div class="setting-item">
-                <label for="volume">Гучність:</label>
-                <input type="range" id="volume" min="0" max="1" step="0.1" value="0.8">
+                <button class="btn-red" id="save-settings">ЗБЕРЕГТИ</button>
             </div>
-            <button id="btn-close-settings" class="btn btn-primary">ЗБЕРЕГТИ</button>
+        </div>
+
+        <!-- Модалка GAME OVER (як на скрінах) -->
+        <div class="modal-overlay hidden" id="modal-gameover">
+            <div class="modal-card modal-gameover-card">
+                <h2 class="gameover-title">GAME OVER</h2>
+                <p class="gameover-text">Твій результат: <span id="final-score">0</span> DOOTS</p>
+                <button class="btn-red" id="restart-btn">ЗНОВУ</button>
+            </div>
         </div>
     </div>
-
-    <audio id="bg-music" src="1doot.mp3" loop></audio>
 
     <script src="script.js"></script>
 </body>

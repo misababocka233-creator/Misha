@@ -1,192 +1,238 @@
 * {
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
     user-select: none;
     -webkit-user-select: none;
-    -webkit-touch-callout: none;
 }
 
 body {
+ 
+    touch-action: manipulation;
     background-color: #000000;
     color: #ffffff;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    height: 100vh;
-    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .game-container {
     width: 100%;
+    max-width: 400px;
     height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    padding: 40px 20px;
+    padding: 60px 20px 50px 20px;
     position: relative;
 }
 
-.score-board {
+/* Рахунок */
+.score-box {
     text-align: center;
-    margin-top: 20px;
 }
 
 #score {
-    font-size: 4rem;
+    font-size: 4.5rem;
     font-weight: 900;
+    line-height: 1;
+}
+
+.score-label {
+    font-size: 1.1rem;
+    color: #636366;
+    margin-top: 5px;
     letter-spacing: 2px;
-    display: block;
 }
 
-.label {
-    font-size: 1.2rem;
-    color: #888;
-    letter-spacing: 4px;
-}
-
+/* Дудець */
 .dudec-wrapper {
-    flex: 1;
+    position: relative;
+    cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
-    cursor: pointer;
-    position: relative;
-}
-
-.dudec-box {
-    position: relative;
-    display: inline-block;
 }
 
 #dudec-img {
-    width: 220px;
+    width: 180px;
     height: auto;
-    background: transparent !important;
-    border: none !important;
-    outline: none !important;
-    box-shadow: none !important;
-    filter: none !important;
-    transition: transform 0.05s ease-out;
+    transition: transform 0.08s ease;
 }
 
-#dudec-img.flip-right {
-    transform: scaleX(1) scale(1.15) rotate(5deg);
+/* Анімація качання вліво-вправо */
+.tilt-left {
+    transform: rotate(-12deg) scale(0.95);
 }
 
-#dudec-img.flip-left {
-    transform: scaleX(-1) scale(1.15) rotate(-5deg);
+.tilt-right {
+    transform: rotate(12deg) scale(1.0);
 }
 
-/* Ноти з дудки */
-#notes-container {
+/* Нотки */
+.note {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
+    font-size: 1.8rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
-.music-note {
+.note-left { left: -30px; top: 20%; }
+.note-right { right: -30px; top: 40%; }
+
+.dancing .note {
+    opacity: 0.8;
+    animation: floatNote 1s ease-in-out infinite alternate;
+}
+
+@keyframes floatNote {
+    0% { transform: translateY(0px); }
+    100% { transform: translateY(-10px); }
+}
+
+/* Скелети, що плавають по екрану */
+.moving-skeleton {
     position: absolute;
-    font-size: 2rem;
-    animation: flyNote 0.6s ease-out forwards;
+    width: 60px;
+    height: auto;
+    cursor: pointer;
     z-index: 10;
+    transition: left 4s linear, top 4s linear, opacity 0.3s ease;
+    opacity: 1;
 }
 
-@keyframes flyNote {
-    0% {
-        opacity: 1;
-        transform: translate(0, 0) scale(0.6) rotate(0deg);
-    }
-    100% {
-        opacity: 0;
-        transform: translate(var(--dx), var(--dy)) scale(1.4) rotate(var(--dr));
-    }
-}
-
-/* Кнопки керування */
-.controls {
-    margin-bottom: 20px;
+/* Нижнє меню */
+.bottom-menu {
     display: flex;
-    gap: 10px;
+    gap: 15px;
+    align-items: center;
 }
 
-.btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
-    padding: 12px 18px;
+.menu-btn {
+    background: #1c1c1e;
+    border: 1px solid #2c2c2e;
+    color: #ffffff;
+    font-weight: 700;
     font-size: 1rem;
-    font-weight: bold;
-    border-radius: 12px;
-    backdrop-filter: blur(5px);
+    padding: 14px 24px;
+    border-radius: 16px;
     cursor: pointer;
 }
 
-.btn-primary {
-    background: #ff4444;
-    border-color: #ff6666;
-    width: 100%;
-    margin-top: 15px;
+.icon-btn {
+    padding: 14px 18px;
+    font-size: 1.1rem;
 }
 
-.btn:active {
-    background: rgba(255, 255, 255, 0.3);
+.menu-btn:active {
+    background: #2c2c2e;
 }
 
 /* Модальні вікна */
-.modal {
+.modal-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 0, 0, 0.75);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 100;
 }
 
-.modal.hidden {
+.modal-overlay.hidden {
     display: none;
 }
 
-.modal-content {
-    background: #111;
-    border: 1px solid #333;
-    padding: 25px;
-    border-radius: 20px;
+.modal-card {
+    background: #121212;
+    border: 1px solid #2c2c2e;
+    border-radius: 24px;
+    padding: 24px;
     width: 85%;
     max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal-card h2 {
     text-align: center;
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.modal-card label {
+    font-size: 0.9rem;
+    color: #8e8e93;
+    margin-top: 5px;
 }
 
 .custom-select {
-    width: 100%;
+    background: #1c1c1e;
+    color: #fff;
+    border: 1px solid #2c2c2e;
     padding: 12px;
-    border-radius: 10px;
-    background: #222;
-    color: white;
-    border: 1px solid #444;
-    margin-top: 8px;
+    border-radius: 12px;
     font-size: 1rem;
+    outline: none;
 }
 
-.setting-item {
-    margin: 20px 0;
+.volume-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin: 15px 0;
+    font-size: 1rem;
 }
 
-.final-score-text {
+#volume-range {
+    accent-color: #007aff;
+}
+
+/* Червона кнопка (ЗБЕРЕГТИ / ЗНОВУ) */
+.btn-red {
+    background: #ff453a;
+    color: #ffffff;
+    border: none;
+    padding: 14px;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    cursor: pointer;
     margin-top: 10px;
-    font-size: 1.2rem;
-    color: #ccc;
+}
+
+.btn-red:active {
+    opacity: 0.8;
+}
+
+/* Стилі Game Over */
+.modal-gameover-card {
+    text-align: center;
+}
+
+.gameover-title {
+    color: #ff453a;
+    font-size: 1.6rem;
+    font-weight: 900;
+}
+
+.gameover-text {
+    font-size: 1.05rem;
+    color: #ffffff;
+    margin: 10px 0 10px 0;
+}
+
+#final-score {
+    font-weight: 800;
 }
